@@ -498,6 +498,7 @@ class Trainer(transformers.Trainer):
             raise ValueError("eval_dataset must implement __len__")
 
         eval_dataloader = self.get_eval_dataloader(eval_dataset)
+        eval_dataloader.batch_size = self.args.per_device_eval_batch_size
 
         output = self.prediction_loop(eval_dataloader, description="Evaluation")
 
