@@ -434,8 +434,6 @@ def main():
     if 'prompt' in model_args.few_shot_type:
         if config.model_type == 'roberta':
             model_fn = RobertaForPromptFinetuning
-        elif config.model_type == 'bert':
-            model_fn = BertForPromptFinetuning
         else:
             raise NotImplementedError
     elif model_args.few_shot_type == 'finetune':
