@@ -417,14 +417,6 @@ def main():
             data_args.template = new_template
 
     # Create config
-    """
-    config = AutoConfig.from_pretrained(
-        model_args.config_name if model_args.config_name else model_args.model_name_or_path,
-        num_labels=num_labels,
-        finetuning_task=data_args.task_name,
-        cache_dir=model_args.cache_dir,
-    )
-    """
     config = AutoConfig.from_pretrained(
         model_args.config_name if model_args.config_name else model_args.model_name_or_path,
         num_labels=num_labels,
@@ -713,13 +705,13 @@ def main():
                 output_path, f"{data_args.test_mode}_eval_results.txt"
             )
 
-            if True: # trainer.is_world_master():
-                with open(output_eval_file, "w") as writer:
-                    logger.info("***** Eval results {} *****".format(eval_dataset.args.task_name))
-                    for key, value in eval_result.items():
-                        logger.info("  %s = %s", key, value)
-                        writer.write("%s = %s\n" % (key, value))
-                        final_result[eval_dataset.args.task_name + '_dev_' + key] = value
+            with open(output_eval_file, "w") as writer:
+                logger.info("***** Eval results {} *****".format(eval_dataset.args.task_name))
+                for key, value in eval_result.items():
+                    logger.info("  %s = %s", key, value)
+                    writer.write("%s = %s\n" % (key, value))
+                    final_result[eval_dataset.args.task_name + '_dev_' + key] = value
+                    
             eval_results.update(eval_result)
         
         # acc = confusion_matrix_analysis(eval_dataset.num_sample, output)
@@ -730,13 +722,6 @@ def main():
     if training_args.do_predict:
         logging.info("*** Test ***")
         test_datasets = [test_dataset]
-        """
-        if data_args.task_name == "mnli":
-            mnli_mm_data_args = dataclasses.replace(data_args, task_name="mnli-mm")
-            test_datasets.append(
-                FewShotDataset(mnli_mm_data_args, tokenizer=tokenizer, mode="test", use_demo=('demo' in model_args.few_shot_type))
-            )
-        """
 
         for test_dataset in test_datasets:
             trainer.compute_metrics = build_compute_metrics_fn(test_dataset.args.task_name)
