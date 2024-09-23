@@ -3,9 +3,9 @@ This is the implementation of the paper [Prompt-Based Bias Calibration for Bette
 (EMNLP 2024 Findings). Code is modified from [LM-BFF](https://github.com/princeton-nlp/LM-BFF).
 
 ## Overview
-![overview](overview.png)
-
 We propose a null-input prompting method for calibrating intrinsic bias of pre-trained language models, aiming to enhance language models’ zero/few-shot performance for both in-context learning and prompt-based fine-tuning. Here are some main contributions:
 - A new perspective of improving pre-trained LM zero/few-shot learning via intrinsic-bias calibration.
 - Unsupervised intrinsic bias calibration using KL-divergence loss.
 - Efficiency and minimal model updates.
+  
+![overview](overview.png)
