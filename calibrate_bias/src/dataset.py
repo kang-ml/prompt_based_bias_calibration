@@ -71,7 +71,6 @@ def tokenize_multipart_input(
     label_word_list=None, 
     first_sent_limit=None,
     other_sent_limit=None,
-    gpt3=False,
     truncate_head=False,
     support_labels=None,
 ):
@@ -527,27 +526,21 @@ class FewShotDataset(torch.utils.data.Dataset):
             counts = {'0': 0, '1': 0}
         selection = []
 
-        if self.args.gpt3_in_context_head or self.args.gpt3_in_context_tail:
-            # For GPT-3's in-context learning, we sample gpt3_in_context_num demonstrations randomly. 
-            order = np.random.permutation(len(context_examples))
-            for i in range(min(self.args.gpt3_in_context_num, len(order))):
-                selection.append(context_examples[order[i]])
-        else:
-            # Our sampling strategy
-            order = np.random.permutation(len(context_examples))
+        # Our sampling strategy
+        order = np.random.permutation(len(context_examples))
 
-            for i in order:
-                label = context_examples[i].label
-                if len(self.label_list) == 1:
-                    # Regression
-                    label = '0' if float(label) <= median_mapping[self.args.task_name] else '1'
-                if counts[label] < max_demo_per_label:
-                    selection.append(context_examples[i])
-                    counts[label] += 1
-                if sum(counts.values()) == len(counts) * max_demo_per_label:
-                    break
-        
-            assert len(selection) > 0
+        for i in order:
+            label = context_examples[i].label
+            if len(self.label_list) == 1:
+                # Regression
+                label = '0' if float(label) <= median_mapping[self.args.task_name] else '1'
+            if counts[label] < max_demo_per_label:
+                selection.append(context_examples[i])
+                counts[label] += 1
+            if sum(counts.values()) == len(counts) * max_demo_per_label:
+                break
+    
+        assert len(selection) > 0
         
         return selection
 
@@ -642,41 +635,27 @@ class FewShotDataset(torch.utils.data.Dataset):
                 # When using demonstrations, double the maximum length
                 # Note that in this case, args.max_seq_length is the maximum length for a single sentence
                 max_length = max_length * 2
-            if self.args.gpt3_in_context_head or self.args.gpt3_in_context_tail:
-                # When using GPT-3's in-context learning, take the maximum tokenization length of the model (512)
-                max_length = 512
 
             # All input sentences, including the query and the demonstrations, are put into augmented_examples, 
             # and are numbered based on the order (starting from 0). For single sentence tasks, the input (query)
-            # is the sentence 0; for sentence-pair tasks, the input (query) is the sentence 0 and 1. Note that for GPT-3's 
-            # in-context learning, the input (query) might be at the end instead of the beginning (gpt3_in_context_head)
+            # is the sentence 0; for sentence-pair tasks, the input (query) is the sentence 0 and 1.
             augmented_example = []
             query_text = input_example_to_tuple(example) # Input sentence list for query
             support_by_label = [[] for i in range(len(label_map))] # {'0': 0, '1': 1, '2': 2}
 
-            if self.args.gpt3_in_context_head or self.args.gpt3_in_context_tail:
-                support_labels = []
-                augmented_example = query_text
-                for support_example in supports:
-                    augmented_example += input_example_to_tuple(support_example)
-                    current_label = support_example.label
-                    if len(label_list) == 1:
-                        current_label = '0' if float(current_label) <= median_mapping[self.args.task_name] else '1' # Regression
-                    support_labels.append(label_map[current_label])
-            else:
-                # Group support examples by label
-                for label_name, label_id in label_map.items():
-                    if len(label_list) == 1:
-                        # Regression
-                        for support_example in filter(lambda s: ('0' if float(s.label) <= median_mapping[self.args.task_name] else '1') == label_name, supports):
-                            support_by_label[label_id] += input_example_to_tuple(support_example)
-                    else:
-                        for support_example in filter(lambda s: s.label == label_name, supports):
-                            support_by_label[label_id] += input_example_to_tuple(support_example)
+            # Group support examples by label
+            for label_name, label_id in label_map.items():
+                if len(label_list) == 1:
+                    # Regression
+                    for support_example in filter(lambda s: ('0' if float(s.label) <= median_mapping[self.args.task_name] else '1') == label_name, supports):
+                        support_by_label[label_id] += input_example_to_tuple(support_example)
+                else:
+                    for support_example in filter(lambda s: s.label == label_name, supports):
+                        support_by_label[label_id] += input_example_to_tuple(support_example)
 
-                augmented_example = query_text # [[example.text_a]] or [(example.text_a, example.text_b)]
-                for label_id in range(len(label_map)):  # # {'0': 0, '1': 1, '2': 2}
-                    augmented_example += support_by_label[label_id]
+            augmented_example = query_text # [[example.text_a]] or [(example.text_a, example.text_b)]
+            for label_id in range(len(label_map)):  # # {'0': 0, '1': 1, '2': 2}
+                augmented_example += support_by_label[label_id]
 
             # Tokenization (based on the template)
             inputs = tokenize_multipart_input(
@@ -690,8 +669,7 @@ class FewShotDataset(torch.utils.data.Dataset):
                 first_sent_limit=self.args.first_sent_limit,
                 other_sent_limit=self.args.other_sent_limit,
                 truncate_head=self.args.truncate_head,
-                gpt3=self.args.gpt3_in_context_head or self.args.gpt3_in_context_tail,
-                support_labels=None if not (self.args.gpt3_in_context_head or self.args.gpt3_in_context_tail) else support_labels
+                support_labels=None
             )
             features = OurInputFeatures(**inputs, label=example_label)
 
