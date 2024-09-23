@@ -67,11 +67,6 @@ class ModelArguments:
         metadata={"help": "Few-shot learning model type. Choice: finetune, prompt, prompt-demo"}
     )
 
-    # Only for BERT-type model
-    random_segment: bool = field(
-        default=False,
-        metadata={"help": "Whether to reinitialize the token type embeddings (only for BERT)."}
-    )
 
 @dataclass
 class DynamicDataTrainingArguments(DataTrainingArguments):
@@ -489,12 +484,6 @@ def main():
         config=config,
         cache_dir=model_args.cache_dir,
     )
-    
-
-    # For BERT, increase the size of the segment (token type) embeddings
-    if config.model_type == 'bert':
-        model.resize_token_embeddings(len(tokenizer))
-        resize_token_type_embeddings(model, new_num_types=10, random_segment=model_args.random_segment)
 
     # Pass dataset and argument information to the model
     if data_args.prompt:
