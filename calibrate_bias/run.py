@@ -210,22 +210,6 @@ class DynamicDataTrainingArguments(DataTrainingArguments):
         metadata={"help": "Use the full length (512)"}
     )
 
-    # GPT-3's in-context learning
-    gpt3_in_context_head: bool = field(
-        default=False,
-        metadata={"help": "GPT-3's in-context learning (context at the beginning)"}
-    )
-
-    gpt3_in_context_tail: bool = field(
-        default=False,
-        metadata={"help": "GPT-3's in-context learning (context at the end)"}
-    )
-
-    gpt3_in_context_num: int = field(
-        default=32,
-        metadata={"help": "Number of context examples"}
-    )
-
     truncate_head: bool = field(
         default=False,
         metadata={"help": "When exceeding the maximum length, truncate the head instead of the tail."}
@@ -237,12 +221,6 @@ class DynamicDataTrainingArguments(DataTrainingArguments):
         metadata={"help": "Whether to use prompt-based fine-tuning"}
     )
 
-    """
-    template_list: list = field(
-        default=None,
-        metadata={"help": "(DO NOT List of templates (only initialized after the program starts."}
-    )
-    """
 
 
 @dataclass
@@ -402,72 +380,46 @@ def main():
 
     # Automatically generate template for using demonstrations
     if data_args.auto_demo and model_args.few_shot_type == 'prompt-demo':
-        # GPT-3's in-context learning
-        if data_args.gpt3_in_context_head or data_args.gpt3_in_context_tail: 
-            logger.info("Automatically convert the template to GPT-3's in-context learning.")
-            assert template_list is None
-
-            old_template = data_args.template
-            new_template = old_template + ''
-            old_template = old_template.replace('*cls*', '')
-            # Single sentence or sentence pair?
-            sent_num = 1
-            if "_1" in old_template:
-                sent_num = 2
-            for instance_id in range(data_args.gpt3_in_context_num):
-                sub_template = old_template + ''
-                # Replace sent_id
-                for sent_id in range(sent_num):
-                    sub_template = sub_template.replace("_{}*".format(sent_id), "_{}*".format(sent_num + sent_num * instance_id + sent_id))
-                # Replace mask
-                sub_template = sub_template.replace("*mask*", "*labelx_{}*".format(instance_id))
-                if data_args.gpt3_in_context_tail:
-                    new_template = new_template + sub_template # Put context at the end
-                else:
-                    new_template = sub_template + new_template # Put context at the beginning
-            logger.info("| {} => {}".format(data_args.template, new_template))
-            data_args.template = new_template
-        else:
-            logger.info("Automatically convert the template to using demonstrations.")
-            if template_list is not None:
-                for i in range(len(template_list)):
-                    old_template = template_list[i]
-                    new_template = old_template + ''
-                    old_template = old_template.replace('*cls*', '')
-                    # Single sentence or sentence pair?
-                    sent_num = 1
-                    if "_1" in old_template:
-                        sent_num = 2
-                    for label_id in range(num_labels):
-                        sub_template = old_template + ''
-                        # Replace sent id
-                        for sent_id in range(sent_num):
-                            sub_template = sub_template.replace("_{}*".format(sent_id), "_{}*".format(sent_num + sent_num * label_id + sent_id))
-                        # Replace mask
-                        sub_template = sub_template.replace("*mask*", "*label_{}*".format(label_id))
-                        new_template = new_template + sub_template
-                    logger.info("| {} => {}".format(template_list[i], new_template))
-                    template_list[i] = new_template
-            else:
-                old_template = data_args.template
+        logger.info("Automatically convert the template to using demonstrations.")
+        if template_list is not None:
+            for i in range(len(template_list)):
+                old_template = template_list[i]
                 new_template = old_template + ''
                 old_template = old_template.replace('*cls*', '')
                 # Single sentence or sentence pair?
                 sent_num = 1
-                # "*cls**sent_0*_It_was*mask*.*sep+*"
                 if "_1" in old_template:
                     sent_num = 2
                 for label_id in range(num_labels):
                     sub_template = old_template + ''
                     # Replace sent id
                     for sent_id in range(sent_num):
-                        sub_template = sub_template.replace('sent', '+sent')  ##################
-                        sub_template = sub_template.replace("_{}".format(sent_id), "_{}".format(sent_num + sent_num * label_id + sent_id))
+                        sub_template = sub_template.replace("_{}*".format(sent_id), "_{}*".format(sent_num + sent_num * label_id + sent_id))
                     # Replace mask
                     sub_template = sub_template.replace("*mask*", "*label_{}*".format(label_id))
                     new_template = new_template + sub_template
-                logger.info("| {} => {}".format(data_args.template, new_template))
-                data_args.template = new_template
+                logger.info("| {} => {}".format(template_list[i], new_template))
+                template_list[i] = new_template
+        else:
+            old_template = data_args.template
+            new_template = old_template + ''
+            old_template = old_template.replace('*cls*', '')
+            # Single sentence or sentence pair?
+            sent_num = 1
+            # "*cls**sent_0*_It_was*mask*.*sep+*"
+            if "_1" in old_template:
+                sent_num = 2
+            for label_id in range(num_labels):
+                sub_template = old_template + ''
+                # Replace sent id
+                for sent_id in range(sent_num):
+                    sub_template = sub_template.replace('sent', '+sent')  ##################
+                    sub_template = sub_template.replace("_{}".format(sent_id), "_{}".format(sent_num + sent_num * label_id + sent_id))
+                # Replace mask
+                sub_template = sub_template.replace("*mask*", "*label_{}*".format(label_id))
+                new_template = new_template + sub_template
+            logger.info("| {} => {}".format(data_args.template, new_template))
+            data_args.template = new_template
 
     # Create config
     """
