@@ -18,7 +18,6 @@ from transformers.data.metrics import glue_compute_metrics
 import dataclasses
 from dataclasses import dataclass, asdict
 from typing import List, Optional, Union
-from sentence_transformers import SentenceTransformer, util
 from copy import deepcopy
 import pandas as pd
 import logging
