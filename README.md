@@ -4,7 +4,7 @@ This is the implementation of the paper [Prompt-Based Bias Calibration for Bette
 
 ## Overview
 We propose a null-input prompting method for calibrating intrinsic bias of pre-trained language models, aiming to enhance language models’ zero/few-shot performance for both in-context learning and prompt-based fine-tuning. Here are some main contributions:
-- A new perspective of improving pre-trained LM zero/few-shot learning via intrinsic-bias calibration.
+- A new perspective of improving pre-trained LM zero/few-shot learning via _intrinsic-bias calibration_.
 - Unsupervised intrinsic bias calibration using KL-divergence loss.
 - Efficiency and minimal model updates.
   
