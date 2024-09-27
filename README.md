@@ -19,6 +19,7 @@ pip install -r requirement.txt
 The `data` folder includes all the eight datasets in the experiment. 
 - `data/agnews` `data/dbpedia` `data/sst-5` `data/trec` `data/subj` are sentence-level classification task.
 - `data/restaurants` `data/laptops` `data/tweets` are aspect-level classification tasks.
+
 + `data/.../data_for_calibration` is used for bias calibration.
   + `.../no_demo`: The inputs to the model don't include few-shot demonstrations. This calibration is for **zero-shot** or **few-shot without demonstration** dowmstream tasks.
     + `.../train.json`: This file contains 32 null-meaning inputs for _One-batch Calibration_ as early-stopping (Section 3.3 in the paper). The `label` for these null inputs are random and not used in calibration. Please ignore.
