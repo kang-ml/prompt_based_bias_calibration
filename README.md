@@ -11,6 +11,10 @@ We propose a null-input prompting method for calibrating intrinsic bias of pre-t
 ![overview](overview.png)
 
 ## Instructions
+### Requirement
+```
+pip install -r requirement.txt
+```
 ### Data
 The `data` folder includes all the eight datasets in the experiment. 
 - `data/agnews` `data/dbpedia` `data/sst-5` `data/trec` `data/subj` are sentence-level classification task.
