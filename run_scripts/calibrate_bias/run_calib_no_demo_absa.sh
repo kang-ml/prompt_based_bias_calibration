@@ -20,7 +20,7 @@ do
           --test_mode zero_shot \
           --max_seq_length 150 \
           --task_name ${task} \
-          --data_dir /content/prompt_based_bias_calibration/data/${task}/data_for_calibration/zero_shot \
+          --data_dir /content/prompt_based_bias_calibration/data/${task}/data_for_calibration/no_demo \
           --save_at_first True \
           --overwrite_output_dir \
           --do_train \
