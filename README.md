@@ -73,3 +73,9 @@ python /content/prompt_based_bias_calibration/calibrate_bias/run.py \
   --seed 13 \
   --first_sent_limit 140
 ```
+Most arguments are inherited from `transformers` and [LM-BFF](https://github.com/princeton-nlp/LM-BFF). We provide some explanations in the following:
+
++ `model_name_or_path`: this part of code only applied to RoBERTa model and its fine-tuned versions.
++ `few_shot_type`:
+  + `= prompt`: The inputs to the model don't include few-shot demonstrations
+  + `= prompt-demo`: The inputs to the model include few-shot demonstrations.
