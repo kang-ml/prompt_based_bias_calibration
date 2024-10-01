@@ -10,12 +10,7 @@ We propose a null-input prompting method for calibrating intrinsic bias of pre-t
   
 ![overview](overview.png)
 
-## Instructions
-### Requirement
-```
-pip install -r requirement.txt
-```
-### Data
+## Data
 The `data` folder includes all the eight datasets in the experiment. 
 - `data/agnews` `data/dbpedia` `data/sst-5` `data/trec` `data/subj` are sentence-level classification task.
 - `data/restaurants` `data/laptops` `data/tweets` are aspect-level classification tasks.
@@ -32,3 +27,10 @@ The `data` folder includes all the eight datasets in the experiment.
     + `.../dev.json`: In this case, some labeled data are available. We use these labeled data to decide the early-stopping point of calibration.
     + `.../test.json`: This file is the test set for the dataset.
 + `data/.../data_for_16_shot_learning` is for prompt-based fine-tuning. We use five different random seeds to selected `train.json` and `dev.json`. `test.json` is the same for the same dataset.
+
+## Code Running
+### Requirement
+To run our code, please install all the packages by using the following command:
+```
+pip install -r requirement.txt
+```
