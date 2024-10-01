@@ -75,7 +75,7 @@ class DynamicDataTrainingArguments(DataTrainingArguments):
     """
     num_k: Optional[int] = field(
         default=16,
-        metadata={"help": "Number of training instances per class"}
+        metadata={"help": "For indexing logs and output directories"}
     )
 
     num_sample: Optional[int] = field(
