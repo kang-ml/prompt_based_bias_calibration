@@ -82,4 +82,4 @@ Most arguments are inherited from `transformers` and [LM-BFF](https://github.com
   + `= prompt`: The inputs to the model don't include few-shot demonstrations.
   + `= prompt-demo`: The inputs to the model include few-shot demonstrations.
 + `num_k`: For indexing logs and output directories.
-+ `num_sample`: for `few_shot_type: prompt-demo, we sample `num_sample` different sets of demonstrations for one input, and average the logits for all `num_sample` samples.
++ `num_sample`: for `few_shot_type: prompt-demo`, we sample `num_sample` different sets of demonstrations for one input, and average the logits for all `num_sample` samples.
